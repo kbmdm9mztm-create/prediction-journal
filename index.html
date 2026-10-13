@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prediction Journal</title>
+</head>
+<body>
+  <h1>Prediction Journal</h1>
+  <input id="text" placeholder="What do you predict?">
+  <input id="confidence" type="number" value="90" min="50" max="100">
+  <button id="add">Add</button>
+  <ul id="list"></ul>
+
+  <script>
+    const textBox = document.getElementById("text"); //this might be thw box where we will enter text like rain , arsenl win etc
+    const confBox = document.getElementById("confidence");//this moght be same as above instead of text it will allow us to enter number and return the value in lsit later
+    const addBtn = document.getElementById("add");//this might be the button which will help us to return the both text and the number that we entered before as a list
+    const list = document.getElementById("list");//this is a list where we see confidnece nuber and text
+
+    const predictions = [];
+
+    function render() {
+    list.innerHTML = "";
+      for (const p of predictions) {
+        const item = document.createElement("li");
+        item.textContent = p.text + " (" + p.confidence + "% sure)";
+        list.appendChild(item);
+      }
+    }
+
+    addBtn.addEventListener("click", function () {
+    if (textBox.value === "") return;
+    if (Number(confBox.value) < 50 || Number(confBox.value) > 100) return;
+    predictions.push({
+        text: textBox.value,
+        confidence: Number(confBox.value),
+      });
+      render();
+   });
+  </script>
+</body>
+</html>
