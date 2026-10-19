@@ -6,36 +6,72 @@
 <body>
   <h1>Prediction Journal</h1>
   <input id="text" placeholder="What do you predict?">
-  <input id="confidence" type="number" value="90" min="50" max="100">
+  <input id="confidence" type="number" value="70" min="50" max="100">
   <button id="add">Add</button>
   <ul id="list"></ul>
+  <p id="score"></p>
 
   <script>
-    const textBox = document.getElementById("text"); //this might be thw box where we will enter text like rain , arsenl win etc
-    const confBox = document.getElementById("confidence");//this moght be same as above instead of text it will allow us to enter number and return the value in lsit later
-    const addBtn = document.getElementById("add");//this might be the button which will help us to return the both text and the number that we entered before as a list
-    const list = document.getElementById("list");//this is a list where we see confidnece nuber and text
+    const textBox = document.getElementById("text");
+    const confBox = document.getElementById("confidence");
+    const addBtn = document.getElementById("add");
+    const list = document.getElementById("list");
+    const scoreText = document.getElementById("score");
 
     const predictions = [];
 
+    // NEW: sets the result of one prediction, then redraws
+    function setResult(index, result) {
+      predictions[index].result = result;
+      render();
+    }
+
     function render() {
-    list.innerHTML = "";
-      for (const p of predictions) {
+      list.innerHTML = "";
+      predictions.forEach(function (p, index) {          // NEW: forEach gives us the position (index) too
         const item = document.createElement("li");
-        item.textContent = p.text + " (" + p.confidence + "% sure)";
+        const status = p.result === null ? "pending" : p.result;
+        item.textContent = p.text + " (" + p.confidence + "% sure) - " + status + " ";
+
+        if (p.result === null) {                         // NEW: only show buttons if not answered yet
+          const rightBtn = document.createElement("button");
+          rightBtn.textContent = "Right";
+          rightBtn.addEventListener("click", function () { setResult(index, "right"); });
+
+          const wrongBtn = document.createElement("button");
+          wrongBtn.textContent = "Wrong";
+          wrongBtn.addEventListener("click", function () { setResult(index, "wrong"); });
+
+          item.append(rightBtn, wrongBtn);
+        }
+
         list.appendChild(item);
+      });
+
+      // NEW: work out the score
+      const answered = predictions.filter(p => p.result !== null);
+      const right = answered.filter(p => p.result === "right");
+      if (answered.length === 0) {
+        scoreText.textContent = "No results yet.";
+      } else {
+        const percent = Math.round(right.length / answered.length * 100);
+        scoreText.textContent = "Right " + right.length + " of " + answered.length + " (" + percent + "%)";
       }
     }
 
     addBtn.addEventListener("click", function () {
-    if (textBox.value === "") return;
-    if (Number(confBox.value) < 50 || Number(confBox.value) > 100) return;
-    predictions.push({
+      if (textBox.value === "") return;
+      if (Number(confBox.value) < 50 || Number(confBox.value) > 100) return;
+
+      predictions.push({
         text: textBox.value,
         confidence: Number(confBox.value),
+        result: null,
       });
       render();
-   });
+    });
+
+    render();                                            // NEW: draw once at the start so the score line shows
   </script>
 </body>
 </html>
